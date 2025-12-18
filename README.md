@@ -97,7 +97,7 @@ sudo meson install -C build
 sudo ldconfig
 ```
 
-### Step4：设置自动对焦
+### Step4：设置自动对焦（如果你使用的是定焦ov5647摄像头，可跳过此步骤）
 
 下载 `ov5647_af.json` 并移动到 `/usr/local/share/libcamera/ipa/rpi/pisp`：
 
