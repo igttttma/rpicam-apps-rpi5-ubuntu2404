@@ -321,7 +321,18 @@ void LibAvEncoder::initAudioOutCodec(VideoOptions const *options, StreamInfo con
 
 	assert(stream_[AudioIn]);
 
+#if LIBAVCODEC_VERSION_MAJOR >= 59
 	av_channel_layout_default(&codec_ctx_[AudioOut]->ch_layout, stream_[AudioIn]->codecpar->ch_layout.nb_channels);
+#else
+	{
+		const int in_channels = stream_[AudioIn]->codecpar->channels;
+		uint64_t in_layout = stream_[AudioIn]->codecpar->channel_layout;
+		if (!in_layout)
+			in_layout = av_get_default_channel_layout(in_channels);
+		codec_ctx_[AudioOut]->channels = in_channels;
+		codec_ctx_[AudioOut]->channel_layout = in_layout;
+	}
+#endif
 
 	codec_ctx_[AudioOut]->sample_rate = options->Get().audio_samplerate ? options->Get().audio_samplerate
 																  : stream_[AudioIn]->codecpar->sample_rate;
@@ -632,17 +643,34 @@ void LibAvEncoder::audioThread()
 {
 	const AVSampleFormat required_fmt = codec_ctx_[AudioOut]->sample_fmt;
 	int ret;
-
-	uint32_t out_channels = codec_ctx_[AudioOut]->ch_layout.nb_channels;
+	uint32_t out_channels = 0;
 
 	SwrContext *conv = nullptr;
 	AVAudioFifo *fifo;
 
+#if LIBAVCODEC_VERSION_MAJOR >= 59
+	out_channels = codec_ctx_[AudioOut]->ch_layout.nb_channels;
 	ret = swr_alloc_set_opts2(&conv, &codec_ctx_[AudioOut]->ch_layout, required_fmt,
 							  stream_[AudioOut]->codecpar->sample_rate, &codec_ctx_[AudioIn]->ch_layout,
 							  codec_ctx_[AudioIn]->sample_fmt, codec_ctx_[AudioIn]->sample_rate, 0, nullptr);
 	if (ret < 0)
 		throw std::runtime_error("libav: cannot create swr context");
+#else
+	{
+		const uint64_t out_layout = codec_ctx_[AudioOut]->channel_layout ?
+										codec_ctx_[AudioOut]->channel_layout :
+										av_get_default_channel_layout(codec_ctx_[AudioOut]->channels);
+		const uint64_t in_layout = codec_ctx_[AudioIn]->channel_layout ?
+									   codec_ctx_[AudioIn]->channel_layout :
+									   av_get_default_channel_layout(codec_ctx_[AudioIn]->channels);
+		out_channels = codec_ctx_[AudioOut]->channels;
+		conv = swr_alloc_set_opts(nullptr, (int64_t)out_layout, required_fmt, stream_[AudioOut]->codecpar->sample_rate,
+								  (int64_t)in_layout, codec_ctx_[AudioIn]->sample_fmt, codec_ctx_[AudioIn]->sample_rate,
+								  0, nullptr);
+		if (!conv)
+			throw std::runtime_error("libav: cannot create swr context");
+	}
+#endif
 
 	// 2 seconds FIFO buffer
 	fifo = av_audio_fifo_alloc(required_fmt, out_channels, codec_ctx_[AudioOut]->sample_rate * 2);
@@ -721,7 +749,12 @@ void LibAvEncoder::audioThread()
 			AVFrame *out_frame = av_frame_alloc();
 			out_frame->nb_samples = codec_ctx_[AudioOut]->frame_size;
 
+#if LIBAVCODEC_VERSION_MAJOR >= 59
 			av_channel_layout_copy(&out_frame->ch_layout, &codec_ctx_[AudioOut]->ch_layout);
+#else
+			out_frame->channels = codec_ctx_[AudioOut]->channels;
+			out_frame->channel_layout = codec_ctx_[AudioOut]->channel_layout;
+#endif
 
 			out_frame->format = required_fmt;
 			out_frame->sample_rate = codec_ctx_[AudioOut]->sample_rate;

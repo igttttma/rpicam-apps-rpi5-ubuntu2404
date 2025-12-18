@@ -149,8 +149,7 @@ void yuv_save(std::vector<libcamera::Span<uint8_t>> const &mem, StreamInfo const
 		yuyv_save(mem, info, filename, options);
 	else if (info.pixel_format == libcamera::formats::YUV420)
 		yuv420_save(mem, info, filename, options);
-	else if (info.pixel_format == libcamera::formats::BGR888 || info.pixel_format == libcamera::formats::RGB888 ||
-			 info.pixel_format == libcamera::formats::BGR161616 || info.pixel_format == libcamera::formats::RGB161616)
+	else if (info.pixel_format == libcamera::formats::BGR888 || info.pixel_format == libcamera::formats::RGB888)
 		rgb_save(mem, info, filename, options);
 	else
 		throw std::runtime_error("unrecognised YUV/RGB save format");

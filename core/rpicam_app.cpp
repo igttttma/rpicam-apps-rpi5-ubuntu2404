@@ -487,9 +487,9 @@ void RPiCamApp::ConfigureStill(unsigned int flags)
 	else if (flags & FLAG_STILL_RGB)
 		configuration_->at(0).pixelFormat = libcamera::formats::RGB888;
 	else if (flags & FLAG_STILL_BGR48)
-		configuration_->at(0).pixelFormat = libcamera::formats::BGR161616;
+		configuration_->at(0).pixelFormat = libcamera::formats::BGR888;
 	else if (flags & FLAG_STILL_RGB48)
-		configuration_->at(0).pixelFormat = libcamera::formats::RGB161616;
+		configuration_->at(0).pixelFormat = libcamera::formats::RGB888;
 	else
 		configuration_->at(0).pixelFormat = libcamera::formats::YUV420;
 	if ((flags & FLAG_STILL_BUFFER_MASK) == FLAG_STILL_DOUBLE_BUFFER)
@@ -640,7 +640,7 @@ void RPiCamApp::StartCamera()
 
 	// Build a list of initial controls that we must set in the camera before starting it.
 	// We don't overwrite anything the application may have set before calling us.
-	if (!controls_.get(controls::ScalerCrop) && !controls_.get(controls::rpi::ScalerCrops))
+	if (!controls_.get(controls::ScalerCrop))
 	{
 		const Rectangle sensor_area = camera_->controls().at(&controls::ScalerCrop).max().get<Rectangle>();
 		const Rectangle default_crop = camera_->controls().at(&controls::ScalerCrop).def().get<Rectangle>();
@@ -668,10 +668,7 @@ void RPiCamApp::StartCamera()
 			LOG(2, "Using crop (lores) " << crops.back().toString());
 		}
 
-		if (options_->GetPlatform() == Platform::VC4)
-			controls_.set(controls::ScalerCrop, crops[0]);
-		else
-			controls_.set(controls::rpi::ScalerCrops, libcamera::Span<const Rectangle>(crops.data(), crops.size()));
+		controls_.set(controls::ScalerCrop, crops[0]);
 	}
 
 	if (!controls_.get(controls::AfWindows) && !controls_.get(controls::AfMetering) &&
@@ -710,12 +707,10 @@ void RPiCamApp::StartCamera()
 
 	if (!controls_.get(controls::ExposureTime) && options_->Get().shutter)
 	{
-		controls_.set(controls::ExposureTimeMode, controls::ExposureTimeModeManual);
 		controls_.set(controls::ExposureTime, options_->Get().shutter.get<std::chrono::microseconds>());
 	}
 	if (!controls_.get(controls::AnalogueGain) && options_->Get().gain)
 	{
-		controls_.set(controls::AnalogueGainMode, controls::AnalogueGainModeManual);
 		controls_.set(controls::AnalogueGain, options_->Get().gain);
 	}
 	if (!controls_.get(controls::AeMeteringMode))

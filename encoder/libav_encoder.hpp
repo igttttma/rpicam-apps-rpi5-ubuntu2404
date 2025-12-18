@@ -22,6 +22,7 @@ extern "C"
 #include "libavdevice/avdevice.h"
 #include "libavformat/avformat.h"
 #include "libavutil/audio_fifo.h"
+#include "libavutil/channel_layout.h"
 #include "libavutil/hwcontext.h"
 #include "libavutil/hwcontext_drm.h"
 #include "libavutil/imgutils.h"
@@ -29,7 +30,7 @@ extern "C"
 #include "libavutil/version.h"
 #include "libswresample/swresample.h"
 
-#if LIBAVCODEC_VERSION_MAJOR < 61
+#if LIBAVCODEC_VERSION_MAJOR < 58
 #error "Error: libavcodec API version is too old for the libav encoder!"
 #endif
 }

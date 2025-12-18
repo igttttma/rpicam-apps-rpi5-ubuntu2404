@@ -68,23 +68,15 @@ static const std::map<PixelFormat, FormatInfo> bayer_formats =
 	{ formats::SGRBG16, { "GRBG-16", 16, TIFF_GRBG, false, false } },
 	{ formats::SBGGR16, { "BGGR-16", 16, TIFF_BGGR, false, false } },
 	{ formats::SGBRG16, { "GBRG-16", 16, TIFF_GBRG, false, false } },
-
-	/* PiSP compressed formats. */
-	{ formats::RGGB_PISP_COMP1, { "RGGB-16-PISP", 16, TIFF_RGGB, false, true } },
-	{ formats::GRBG_PISP_COMP1, { "GRBG-16-PISP", 16, TIFF_GRBG, false, true } },
-	{ formats::GBRG_PISP_COMP1, { "GBRG-16-PISP", 16, TIFF_GBRG, false, true } },
-	{ formats::BGGR_PISP_COMP1, { "BGGR-16-PISP", 16, TIFF_BGGR, false, true } },
 };
 
 static const std::map<PixelFormat, FormatInfo> mono_formats =
 {
 	/* Monochrome formats */
+	{ formats::R8, { "MONO-8", 8, NULL, false, false } },
+	{ formats::R10, { "MONO-10", 10, NULL, false, false } },
+	{ formats::R12, { "MONO-12", 12, NULL, false, false } },
 	{ formats::R10_CSI2P, { "MONO-10", 10, NULL, false, false } },
-	{ formats::R12_CSI2P, { "MONO-12", 12, NULL, false, false } },
-	{ formats::R16,		  { "MONO-16", 16, NULL, false, false } },
-
-	/* Monochrome + PISP compressed format */
-	{ formats::MONO_PISP_COMP1, { "MONO-16-PISP", 16, NULL, false, true } },
 };
 
 static bool is_mono(const PixelFormat &format)
