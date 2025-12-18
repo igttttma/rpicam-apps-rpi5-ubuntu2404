@@ -95,7 +95,7 @@ sudo apt install -y qt5-qmake qtmultimedia5-dev
 ```
 
 ```bash
-meson setup build -Denable_libav=enabled -Denable_drm=enabled -Denable_egl=enabled -Denable_qt=enabled -Denable_opencv=disabled -Denable_tflite=enabled -Denable_hailo=disabled
+meson setup build -Denable_libav=enabled -Denable_drm=enabled -Denable_egl=enabled -Denable_qt=enabled -Denable_opencv=enabled -Denable_tflite=enabled -Denable_hailo=disabled
 ```
 
 这里注明，完成了 Step2 后，才可设置 `-Denable_tflite=enabled`，如不需要可设置为 `disabled`。
