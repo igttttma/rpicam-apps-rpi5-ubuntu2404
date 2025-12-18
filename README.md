@@ -33,14 +33,14 @@
 
 ## 构建
 
-如果你已经在本机安装了构建依赖并创建了 `build/`：
+部署流程与原版rpicam-apps相同，只需要在git克隆仓库时，将官方仓库替换为本仓库的URL：
 
 ```bash
-meson compile -C build
+git clone https://github.com/igttttma/rpicam-apps-rpi5-ubuntu2404.git
+cd rpicam-apps-rpi5-ubuntu2404
 ```
 
-首次配置可参考上游官方文档（构建依赖以你的发行版为准）：
-https://www.raspberrypi.com/documentation/computers/camera_software.html#building-libcamera-and-rpicam-apps
+后续按官方的指引操作即可，如果你不清楚配置和构建流程，请参考`附：OV5647 自动对焦摄像头的完整配置过程`部分。
 
 ## 附：OV5647 自动对焦摄像头的完整配置过程（Raspberry Pi 5 + Ubuntu 24.04 LTS + Rpicam with tensorflow-lite）
 
