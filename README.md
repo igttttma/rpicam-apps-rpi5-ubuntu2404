@@ -28,6 +28,100 @@ meson compile -C build
 首次配置可参考上游官方文档（构建依赖以你的发行版为准）：
 https://www.raspberrypi.com/documentation/computers/camera_software.html#building-libcamera-and-rpicam-apps
 
+## OV5647 自动对焦（Raspberry Pi 5 详细配置）
+
+需严格按照以下步骤进行。
+
+### part1：本地编译 libcamera
+
+不要从 apt 系统安装 `libcamera*` 软件包。
+
+在构建 libcamera 之前，请安装以下软件包：
+
+```bash
+sudo apt install -y build-essential
+sudo apt install -y libboost-dev
+sudo apt install -y libgnutls28-dev openssl libtiff-dev pybind11-dev
+sudo apt install -y qtbase5-dev libqt5core5a libqt5widgets5t64
+sudo apt install -y meson cmake
+sudo apt install -y python3-yaml python3-ply
+#sudo apt install -y libglib2.0-dev libgstreamer-plugins-base1.0-dev
+```
+
+完成上述步骤后，将 libcamera 代码库克隆到本地，并使用以下命令进行构建：
+
+```bash
+git clone https://github.com/raspberrypi/libcamera.git
+cd libcamera
+meson setup build --buildtype=release -Dpipelines=rpi/vc4,rpi/pisp -Dipas=rpi/vc4,rpi/pisp -Dv4l2=true -Dgstreamer=enabled -Dtest=false -Dlc-compliance=disabled -Dcam=disabled -Dqcam=disabled -Ddocumentation=disabled -Dpycamera=enabled
+ninja -C build install
+sudo ninja -C build install
+```
+
+### part2（可选）：获取 tensorflow-lite
+
+方法来自：https://github.com/prepkg/tensorflow-lite-raspberrypi
+
+执行以下命令：
+
+```bash
+wget https://github.com/prepkg/tensorflow-lite-raspberrypi/releases/latest/download/tensorflow-lite_64.deb
+sudo apt install -y ./tensorflow-lite_64.deb
+```
+
+### part3：从源代码安装 rpicam-apps
+
+```bash
+git clone https://github.com/igttttma/rpicam-apps-rpi5-ubuntu2404.git
+cd rpicam-apps-rpi5-ubuntu2404
+sudo apt install -y cmake libboost-program-options-dev libdrm-dev libexif-dev
+sudo apt install -y ffmpeg libavcodec-extra libavcodec-dev libavdevice-dev libpng-dev libpng-tools libepoxy-dev
+sudo apt install -y qt5-qmake qtmultimedia5-dev
+```
+
+```bash
+meson setup build -Denable_libav=enabled -Denable_drm=enabled -Denable_egl=enabled -Denable_qt=enabled -Denable_opencv=disabled -Denable_tflite=enabled -Denable_hailo=disabled
+```
+
+这里注明，完成了 part2 后，才可设置 `-Denable_tflite=enabled`，如不需要可设置为 `disabled`。
+
+```bash
+meson compile -C build
+sudo meson install -C build
+sudo ldconfig
+```
+
+### part4：设置自动对焦
+
+下载 `ov5647_af.json` 并移动到 `/usr/local/share/libcamera/ipa/rpi/pisp`：
+
+```bash
+wget -O /tmp/ov5647_af.json https://raw.githubusercontent.com/ArduCAM/libcamera/arducam/src/ipa/rpi/pisp/data/ov5647_af.json
+sudo install -D -m 644 /tmp/ov5647_af.json /usr/local/share/libcamera/ipa/rpi/pisp/ov5647_af.json
+```
+
+### part5：修改配置文件
+
+```bash
+sudo nano /boot/config.txt
+```
+
+Find the line: `camera_auto_detect=1`, update it to:
+
+```
+camera_auto_detect=0
+```
+
+Find the line: `[all]`, add the following item under it:
+
+```
+dtoverlay=ov5647,cam0
+```
+
+Save and reboot.
+
+重启，大功告成。
+
 ## 免责声明
 
 本仓库不是 Raspberry Pi 官方发布版本，仅用于在特定环境（Raspberry Pi 5 + Ubuntu 24.04 LTS）下解决编译兼容性问题。若你使用的是 Raspberry Pi OS 或更新的 `libcamera`/FFmpeg 组合，建议优先使用上游仓库。
