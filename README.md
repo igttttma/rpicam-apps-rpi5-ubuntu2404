@@ -40,7 +40,8 @@ https://www.raspberrypi.com/documentation/computers/camera_software.html#buildin
 
 ### Step1：本地编译 libcamera
 
-不要从 apt 系统安装 `libcamera*` 软件包。
+> [!IMPORTANT]
+> 不要从 apt 系统安装 `libcamera*` 软件包。请确保系统中没有安装任何 `libcamera` 相关软件包。
 
 在构建 libcamera 之前，请安装以下软件包：
 
