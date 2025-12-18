@@ -43,7 +43,7 @@ https://www.raspberrypi.com/documentation/computers/camera_software.html#buildin
 > [!IMPORTANT]
 > 不要从 apt 系统安装 `libcamera*` 软件包。请确保系统中没有安装任何 `libcamera` 相关软件包。
 
-在构建 libcamera 之前，请安装以下软件包：
+在构建 libcamera 之前，请安装以下包：
 
 ```bash
 sudo apt install -y build-essential
@@ -90,7 +90,7 @@ sudo apt install -y qt5-qmake qtmultimedia5-dev
 meson setup build -Denable_libav=enabled -Denable_drm=enabled -Denable_egl=enabled -Denable_qt=enabled -Denable_opencv=disabled -Denable_tflite=enabled -Denable_hailo=disabled
 ```
 
-这里注明，完成了 part2 后，才可设置 `-Denable_tflite=enabled`，如不需要可设置为 `disabled`。
+这里注明，完成了 Step2 后，才可设置 `-Denable_tflite=enabled`，如不需要可设置为 `disabled`。
 
 ```bash
 meson compile -C build
