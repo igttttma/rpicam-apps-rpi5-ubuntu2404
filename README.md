@@ -38,7 +38,7 @@ https://www.raspberrypi.com/documentation/computers/camera_software.html#buildin
 
 需严格按照以下步骤进行。
 
-### part1：本地编译 libcamera
+### Step1：本地编译 libcamera
 
 不要从 apt 系统安装 `libcamera*` 软件包。
 
@@ -64,7 +64,7 @@ ninja -C build install
 sudo ninja -C build install
 ```
 
-### part2（可选）：获取 tensorflow-lite
+### Step2（可选）：获取 tensorflow-lite
 
 方法来自：https://github.com/prepkg/tensorflow-lite-raspberrypi
 
@@ -75,7 +75,7 @@ wget https://github.com/prepkg/tensorflow-lite-raspberrypi/releases/latest/downl
 sudo apt install -y ./tensorflow-lite_64.deb
 ```
 
-### part3：从源代码安装 rpicam-apps
+### Step3：从源代码安装 rpicam-apps
 
 ```bash
 git clone https://github.com/igttttma/rpicam-apps-rpi5-ubuntu2404.git
@@ -97,7 +97,7 @@ sudo meson install -C build
 sudo ldconfig
 ```
 
-### part4：设置自动对焦
+### Step4：设置自动对焦
 
 下载 `ov5647_af.json` 并移动到 `/usr/local/share/libcamera/ipa/rpi/pisp`：
 
@@ -106,7 +106,7 @@ wget -O /tmp/ov5647_af.json https://raw.githubusercontent.com/ArduCAM/libcamera/
 sudo install -D -m 644 /tmp/ov5647_af.json /usr/local/share/libcamera/ipa/rpi/pisp/ov5647_af.json
 ```
 
-### part5：修改配置文件
+### Step5：修改配置文件
 
 ```bash
 sudo nano /boot/config.txt
