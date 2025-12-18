@@ -12,7 +12,7 @@
 > 这里的 `0.2.0` 指的是 Ubuntu 24.04 下通过 `sudo apt install libcamera-dev` 默认安装到系统里的版本（相对较旧）。
 > 本仓库通过修改源码实现了对该版本的编译支持，但经过实测：**仅通过 apt 安装的 libcamera 版本，可能无法与 rpicam-apps 很好对接**。
 > 如果你编译安装后的 `rpicam-apps` 仍然“找不到摄像头”，优先尝试 **本地编译并安装 libcamera**，然后再编译安装本仓库的 `rpicam-apps`，通常能解决问题。
-> 详细步骤见 `## OV5647 自动对焦（Raspberry Pi 5 详细配置）`。
+> 详细步骤见 `附：OV5647 自动对焦摄像头的完整配置过程`。
 
 ## 与上游不同之处（本仓库主要改动）
 
@@ -34,7 +34,7 @@ meson compile -C build
 首次配置可参考上游官方文档（构建依赖以你的发行版为准）：
 https://www.raspberrypi.com/documentation/computers/camera_software.html#building-libcamera-and-rpicam-apps
 
-## OV5647 自动对焦（Raspberry Pi 5 详细配置）
+## 附：OV5647 自动对焦摄像头的完整配置过程（Raspberry Pi 5 + Ubuntu 24.04 LTS + Rpicam with tensorflow-lite）
 
 需严格按照以下步骤进行。
 
