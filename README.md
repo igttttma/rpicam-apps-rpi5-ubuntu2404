@@ -1,24 +1,31 @@
 # rpicam-apps (Raspberry Pi 5 / Ubuntu 24.04 LTS 兼容版)
 
-这是对上游 `raspberrypi/rpicam-apps` 的兼容性改动版本，目标是让代码在 **Raspberry Pi 5 + Ubuntu 24.04 LTS**（系统自带较旧的 `libcamera` 头文件/ABI 组合）环境中可以正常编译通过并完成基础功能。
+这是对上游 `raspberrypi/rpicam-apps` 的兼容性改动版本，目标是让代码在 **Raspberry Pi 5 + Ubuntu 24.04 LTS**（系统自带较旧的 `libcamera`/`libavcodec` 版本组合）环境中可以正常编译通过并完成基础功能。
+
+本仓库 fork 自 `raspberrypi/rpicam-apps` 的 `v1.11.0`（tag），并在其基础上增加了面向 Ubuntu 24.04 的兼容性改动。
 
 ## 适用环境
 
 - 硬件：Raspberry Pi 5
 - 系统：Ubuntu 24.04 LTS（aarch64）
 - `libcamera`：系统头文件显示为 `0.2.0`（见 `/usr/include/libcamera/libcamera/version.h`）
+- `libavcodec`：系统头文件显示主版本为 `60`（见 `/usr/include/aarch64-linux-gnu/libavcodec/version_major.h`，或 `pkg-config --modversion libavcodec`）
 
 > [!IMPORTANT]
 > 这里的 `0.2.0` 指的是 Ubuntu 24.04 下通过 `sudo apt install libcamera-dev` 默认安装到系统里的版本（相对较旧）。
 > 本仓库通过修改源码实现了对该版本的编译支持，但经过实测：**仅通过 apt 安装的 libcamera 版本，可能无法与 rpicam-apps 很好对接**。
 > 如果你编译安装后的 `rpicam-apps` 仍然“找不到摄像头”，优先尝试 **本地编译并安装 libcamera**，然后再编译安装本仓库的 `rpicam-apps`，通常能解决问题。
-> 详细步骤见 `附：OV5647 自动对焦摄像头的完整配置过程`。
+> 详细步骤见 `## OV5647 自动对焦（Raspberry Pi 5 详细配置）`。
+
+> [!IMPORTANT]
+> 本仓库最初的动机是解决 `libavcodec` 版本门槛问题：上游 `rpicam-apps` 的 libav 编码器在较新版本中要求 `LIBAVCODEC_VERSION_MAJOR >= 61`，而 Ubuntu 24.04 通过 apt 安装的 `libavcodec-dev` 通常是 `60`（例如本机头文件为 `60`），会直接导致编译失败。
+> `libavcodec` `v61+` 通常只在 Raspberry Pi OS（Trixie）等更新的发行版中有现成打包。本仓库通过修改源码，增加了对较旧 `libavcodec` 的兼容支持。
 
 ## 与上游不同之处（本仓库主要改动）
 
 本 fork 的核心是“向后兼容”，因此有些上游新增功能会被降级或跳过。
 
-- `libav`/FFmpeg 兼容：放宽 `libavcodec` 版本门槛，并对音频通道布局、重采样等 API 做新旧分支兼容（`ch_layout` vs `channel_layout/channels`，`swr_alloc_set_opts2` vs `swr_alloc_set_opts`）。
+- `libav`/FFmpeg 兼容：移除对 `LIBAVCODEC_VERSION_MAJOR >= 61` 的硬性要求，并对音频通道布局、重采样等 API 做新旧分支兼容（`ch_layout` vs `channel_layout/channels`，`swr_alloc_set_opts2` vs `swr_alloc_set_opts`）。
 - `libcamera controls` 兼容：在旧版 `libcamera` 中，部分控制项处于 `controls::draft` 或不存在；本版本对 AE 状态等元数据读取做了兼容处理。
 - 像素格式兼容：移除旧版 `libcamera::formats` 中不存在的像素格式（例如部分 PiSP/高位深 RGB/Mono 格式），相关保存/识别逻辑做降级处理。
 - 同步/厂商扩展控制降级：若系统头文件不包含对应的 `controls::rpi::*` 项，则同步相关逻辑会被关闭，避免编译失败。
@@ -34,7 +41,7 @@ meson compile -C build
 首次配置可参考上游官方文档（构建依赖以你的发行版为准）：
 https://www.raspberrypi.com/documentation/computers/camera_software.html#building-libcamera-and-rpicam-apps
 
-## 附：OV5647 自动对焦摄像头的完整配置过程（Raspberry Pi 5 + Ubuntu 24.04 LTS + Rpicam with tensorflow-lite）
+## OV5647 自动对焦（Raspberry Pi 5 详细配置）
 
 需严格按照以下步骤进行。
 
